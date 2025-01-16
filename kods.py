@@ -1,14 +1,16 @@
 import pygame
 import random
 import time
+import os
 
-# Initialize pygame
+
+
 pygame.init()
 
-# Screen dimensions
+# Ekrāna lielums
 WIDTH, HEIGHT = 1800, 1000
 
-# Colors
+# Krāsas
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -17,7 +19,7 @@ GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
 GRAY = (200, 200, 200)
 
-# Arrow colors and positions
+# Bultiņu krāsas un pozīcijas
 ARROW_COLORS = [RED, BLUE, GREEN, YELLOW]
 ARROW_KEYS = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
 ARROW_POSITIONS = [
@@ -27,11 +29,11 @@ ARROW_POSITIONS = [
     (5 * WIDTH // 6, HEIGHT // 2),   # Right
 ]
 
-# Setup screen
+# Sākuma ekrāns
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Reaction Time Game")
+pygame.display.set_caption("Reakcijas tests")
 
-# Font
+# Fonts
 font = pygame.font.Font(None, 50)
 small_font = pygame.font.Font(None, 30)
 
@@ -40,22 +42,34 @@ def display_text(text, x, y, color=BLACK):
     text_surface = font.render(text, True, color)
     screen.blit(text_surface, (x, y))
 
+def draw_restart_button():
+
+    """Draw the restart button."""
+
+    button_rect = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 100, 200, 100)
+
+    pygame.draw.rect(screen, GRAY, button_rect)
+
+    pygame.draw.rect(screen, BLACK, button_rect, 3)
+
+    display_text("RESTART", WIDTH // 2 - 60, HEIGHT // 2 + 130)
+
 def draw_arrows(highlighted=None):
     """Draw arrows on the screen, optionally highlighting one."""
     for i, pos in enumerate(ARROW_POSITIONS):
         color = ARROW_COLORS[i] if i == highlighted else BLACK
         
-        if i == 0:  # Up Arrow
+        if i == 0:  # Bulta uz augsu
             points = [(pos[0], pos[1] - 50), (pos[0] - 40, pos[1] + 50), (pos[0] + 40, pos[1] + 50)]
-        elif i == 1:  # Down Arrow
+        elif i == 1:  # Bulta uz leju
             points = [(pos[0], pos[1] + 50), (pos[0] - 40, pos[1] - 50), (pos[0] + 40, pos[1] - 50)]
-        elif i == 2:  # Left Arrow
+        elif i == 2:  # Bulta pa kreisi
             points = [(pos[0] - 50, pos[1]), (pos[0] + 50, pos[1] - 40), (pos[0] + 50, pos[1] + 40)]
-        else:  # Right Arrow
+        else:  # Bulta pa labi
             points = [(pos[0] + 50, pos[1]), (pos[0] - 50, pos[1] - 40), (pos[0] - 50, pos[1] + 40)]
         
         pygame.draw.polygon(screen, color, points)
-        pygame.draw.polygon(screen, BLACK, points, 3)  # Border for clarity
+        pygame.draw.polygon(screen, BLACK, points, 3) 
 
 def draw_start_button():
     """Draw the start button."""
@@ -64,14 +78,28 @@ def draw_start_button():
     pygame.draw.rect(screen, BLACK, button_rect, 3)
     display_text("START", WIDTH // 2 - 50, HEIGHT // 2 - 20)
 
+def draw_restart_button():
+
+    """Draw the restart button."""
+
+    button_rect = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 + 100, 200, 100)
+
+    pygame.draw.rect(screen, GRAY, button_rect)
+
+    pygame.draw.rect(screen, BLACK, button_rect, 3)
+
+    display_text("RESTART", WIDTH // 2 - 60, HEIGHT // 2 + 130)
+
+    
+
 def display_results(results):
     """Display the results after the game is over."""
     screen.fill(WHITE)
-    display_text("Results", WIDTH // 2 - 100, 50, BLACK)
+    display_text("Rezultāti", WIDTH // 2 - 100, 50, BLACK)
 
     y_offset = 120
     for i, result in enumerate(results):
-        result_text = f"Attempt {i + 1}: {result:.3f} seconds"
+        result_text = f"Mēģinājums {i + 1}: {result:.3f} sekundes"
         result_surface = small_font.render(result_text, True, BLACK)
         screen.blit(result_surface, (WIDTH // 2 - 200, y_offset))
         y_offset += 30
@@ -85,9 +113,9 @@ def display_results(results):
         min_time = min(results)
         max_time = max(results)
         stats_text = [
-            f"Average: {avg_time:.3f} seconds",
-            f"Minimum: {min_time:.3f} seconds",
-            f"Maximum: {max_time:.3f} seconds",
+            f"Vidējais: {avg_time:.3f} sekundes",
+            f"Minimums: {min_time:.3f} sekundes",
+            f"Maksimums: {max_time:.3f} sekundes",
         ]
 
         y_offset += 30
@@ -96,7 +124,10 @@ def display_results(results):
             screen.blit(stat_surface, (WIDTH // 2 - 200, y_offset))
             y_offset += 30
 
+        
+
     pygame.display.flip()
+
 
 def main():
     running = True
@@ -109,7 +140,7 @@ def main():
     unlit_timer = 0  # Timer for unlit state
     light_delay = 0  # Randomized delay for next highlight
     results = []  # Store reaction times
-    max_tests = 10  # Maximum tests
+    max_tests = 2  # Maximum tests
     test_count = 0
     game_over = False
 
@@ -148,9 +179,10 @@ def main():
         if not start_button_clicked:
             draw_start_button()
         elif countdown > 0:
-            display_text(f"Game starts in: {countdown}", WIDTH // 2 - 150, HEIGHT // 2 - 30)
+            display_text(f"Tests sākas pēc: {countdown}", WIDTH // 2 - 150, HEIGHT // 2 - 30)
         elif game_over:
             display_results(results)
+            draw_restart_button()
         else:
             if not game_started:
                 if highlighted is None:
